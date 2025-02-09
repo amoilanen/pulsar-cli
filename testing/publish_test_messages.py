@@ -2,13 +2,31 @@ import pulsar
 import uuid
 import json
 
-pulsar_url = 'pulsar://localhost:6650'
-topic_name = 'persistent://public/default/orders'
+# For example when using a StreamNative hosted instance
+#pulsar_url = "pulsar+ssl://<your-host>.aws-use2-production-snci-pool-kid.streamnative.aws.snio.cloud:6651"
+#issuer_url = "https://auth.streamnative.cloud/"
+#private_key_path = "<path-to-json-oauth-credentials>"
+#audience = "urn:sn:pulsar:o-<your-organization>:<your-instance>"
+#params = {
+#    "issuer_url": issuer_url,
+#    "private_key": private_key_path,
+#    "audience": audience
+#}
+#authentication = pulsar.AuthenticationOauth2(json.dumps(params, indent=4))
 
-orders_number = 1000
+pulsar_url = 'pulsar://localhost:6650'
+authentication = None
+
+client = None
+if authentication is None:
+    client = pulsar.Client(pulsar_url)
+else:
+    client = pulsar.Client(pulsar_url, authentication=authentication)
+
+topic_name = 'persistent://public/default/orders'
+orders_number = 100
 order_number_prefix = 22300000
 
-client = pulsar.Client(pulsar_url)
 producer = client.create_producer(topic_name)
 
 for id in range(0, orders_number):

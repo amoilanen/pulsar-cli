@@ -2,15 +2,32 @@ import pulsar
 import json
 import uuid
 
-search_term = "22300500"
-
-pulsar_url = "pulsar://localhost:6650"
+search_term = "22300020"
 topic_name = "orders"
-
 topic_base = f"persistent://public/default/{topic_name}"
-max_messages_per_partition = 1000
+max_messages_per_partition = 50
 
-client = pulsar.Client(pulsar_url)
+# For example when using a StreamNative hosted instance
+#pulsar_url = "pulsar+ssl://<your-host>.aws-use2-production-snci-pool-kid.streamnative.aws.snio.cloud:6651"
+#issuer_url = "https://auth.streamnative.cloud/"
+#private_key_path = "<path-to-json-oauth-credentials>"
+#audience = "urn:sn:pulsar:o-<your-organization>:<your-instance>"
+#params = {
+#    "issuer_url": issuer_url,
+#    "private_key": private_key_path,
+#    "audience": audience
+#}
+#authentication = pulsar.AuthenticationOauth2(json.dumps(params, indent=4))
+
+pulsar_url = 'pulsar://localhost:6650'
+authentication = None
+
+client = None
+if authentication is None:
+    client = pulsar.Client(pulsar_url)
+else:
+    client = pulsar.Client(pulsar_url, authentication=authentication)
+
 partitions = client.get_topic_partitions(topic_name)
 num_partitions = len(partitions)
 
