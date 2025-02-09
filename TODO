@@ -1,0 +1,7 @@
+- Add command to publish to a local topic (possibly partitioned, support both partition and not partitioned)
+- Add a command to search for a message from a local topic (possibly partitioned, support both partition and not partitioned)
+- Add a command to peek at the messages from a local topic (possibly partitioned, support both partition and not partitioned)
+
+- Add a command to check the stats of a local topic
+- Enable support for external pulsar clusters with custom authentication such as StreamNative
+  -- Allow to specify the number of partitions or run as admin if allowed
