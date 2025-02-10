@@ -1,11 +1,13 @@
 import pulsar
 import json
 import uuid
+import time
 
 search_term = "22300020"
 topic_name = "orders"
 topic_base = f"persistent://public/default/{topic_name}"
 max_messages_per_partition = 50
+seek_window_minutes = 60
 
 # For example when using a StreamNative hosted instance
 #pulsar_url = "pulsar+ssl://<your-host>.aws-use2-production-snci-pool-kid.streamnative.aws.snio.cloud:6651"
@@ -18,7 +20,6 @@ max_messages_per_partition = 50
 #    "audience": audience
 #}
 #authentication = pulsar.AuthenticationOauth2(json.dumps(params, indent=4))
-
 pulsar_url = 'pulsar://localhost:6650'
 authentication = None
 
@@ -39,6 +40,11 @@ for partition in range(0, num_partitions):
     partition_name = f"{topic_base}-partition-{partition}"
     temp_subscription = f"temporary-pulsar-cli-{uuid.uuid4()}"
     consumer = client.subscribe(partition_name, temp_subscription, consumer_type=pulsar.ConsumerType.Exclusive, initial_position=pulsar.InitialPosition.Earliest)
+
+    current_time_minutes = int(time.time() / 60)
+    timestamp = current_time_minutes - seek_window_minutes
+    consumer.seek(timestamp * 60 * 1000)
+
     print(f"Reading from partition {partition}...")
     reading_from_partition = True
     messages_read_count = 0
