@@ -1,6 +1,12 @@
+- Add a command to start listening to a local topic
+- Add a command to stop listening to a local topic
 - Add command to publish to a local topic (possibly partitioned, support both partition and not partitioned)
+  -- Both message properties and message data can be input if not specified otherwise
 - Add a command to search for a message from a local topic (possibly partitioned, support both partition and not partitioned)
-- Add a command to peek at the messages from a local topic (possibly partitioned, support both partition and not partitioned)
-- Add a command to check the stats of a local topic (possibly partitioned, support both partition and not partitioned)
+  -- Both message properties and message data should be output if not specified otherwise
 
 - Enable support for external pulsar clusters with custom authentication such as StreamNative
+  -- Allow to either provide the auth details as options or read the auth details from ~/.config/pulsar/config (when the flag --pulsarctl is provided)
+
+- Add a command to peek at the messages from a local topic (possibly partitioned, support both partition and not partitioned)
+- Add a command to check the stats of a local topic (possibly partitioned, support both partition and not partitioned)

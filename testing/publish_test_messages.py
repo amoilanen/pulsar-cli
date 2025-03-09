@@ -1,6 +1,8 @@
 import pulsar
 import uuid
 import json
+from datetime import datetime, timezone
+
 
 # For example when using a StreamNative hosted instance
 #pulsar_url = "pulsar+ssl://<your-host>.aws-use2-production-snci-pool-kid.streamnative.aws.snio.cloud:6651"
@@ -33,7 +35,9 @@ for id in range(0, orders_number):
     order_id = str(uuid.uuid4())
     order_number = str(order_number_prefix + id)
     message = {"order_id": order_id, "order_number": order_number}
-    producer.send(json.dumps(message).encode('utf-8'))
+    producer.send(json.dumps(message).encode('utf-8'), properties = {
+        "published_at": datetime.now(timezone.utc).isoformat()
+    })
     print(f"Message sent: {message}")
 
 producer.close()
