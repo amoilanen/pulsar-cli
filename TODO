@@ -2,6 +2,7 @@
 - Add a command to stop listening to a local topic
 - Add command to publish to a local topic (possibly partitioned, support both partition and not partitioned)
   -- Both message properties and message data can be input if not specified otherwise
+  -- Support publishing a list of messages
 - Add a command to search for a message from a local topic (possibly partitioned, support both partition and not partitioned)
   -- Both message properties and message data should be output if not specified otherwise
 

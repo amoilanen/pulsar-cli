@@ -1,1 +1,10 @@
 cargo run -- attach --topic=public/default/orders
+
+cargo run -- publish --topic=public/default/orders
+{
+    "properties": {"published_at": "2025-03-13T21:56:54.160296+00:00"},
+    "data": {
+        "order_id": "3d2543b4-2a58-4c80-b18d-ac58f3524087",
+        "order_number": "123456"
+    }
+}

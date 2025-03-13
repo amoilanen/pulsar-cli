@@ -1,8 +1,9 @@
-use clap::{Parser, Subcommand};
+use clap::{Command, Parser, Subcommand};
 use pulsar::{Pulsar, TokioExecutor};
 use anyhow::Error;
 
 mod commands;
+mod io;
 
 #[derive(Parser)]
 #[command(name = "pulsar-cli", about = "A command line tool to simpify publishing and viewing Pulsar messages")]
@@ -56,6 +57,12 @@ async fn main() -> Result<(), Error> {
         Commands::Detach { topic } => {
             println!("Unsubscribing from {:?}", topic);
             commands::detach::execute(&mut pulsar, &topic).await?;
+            Ok(())
+        }
+        Commands::Publish { topic } => {
+            println!("Publishing to {:?}", topic);
+            commands::publish::execute(&mut pulsar, &topic).await?;
+            println!("Successfully published to {:?}", topic);
             Ok(())
         }
         _ => {
