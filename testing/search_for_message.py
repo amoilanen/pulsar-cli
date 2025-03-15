@@ -3,7 +3,7 @@ import json
 import uuid
 import time
 
-search_term = "3d2543b4-2a58-4c80-b18d-ac58f3524087"
+search_term = ""
 topic_name = "orders"
 topic_base = f"public/default/{topic_name}"
 max_messages_per_partition = 50

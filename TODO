@@ -1,10 +1,9 @@
-- Add a command to start listening to a local topic
-  -- Add an argument to listen from the start or from the end of the topic
 - Add command to publish to a local topic (possibly partitioned, support both partition and not partitioned)
   -- Both message properties and message data can be input if not specified otherwise
   -- Support publishing a list of messages
 - Add a command to search for a message from a local topic (possibly partitioned, support both partition and not partitioned)
   -- Both message properties and message data should be output if not specified otherwise
+  -- Both message properties and message data should be searched
   -- Option to either auto-acknowledge the messages or not auto-acknowledge them
   -- Option to specify how far into the past should seek the old messages (i.e. reset the subscription with "seek", default ~1 day)
   -- Option to limit the number of messages which can be found
