@@ -1,5 +1,6 @@
-use clap::{Command, Parser, Subcommand};
+use clap::{Parser, Subcommand};
 use pulsar::{Pulsar, TokioExecutor};
+use std::str::FromStr;
 use anyhow::Error;
 
 mod commands;
@@ -12,12 +13,32 @@ struct CommandLineInputs {
     command: Commands,
 }
 
+#[derive(Debug, Clone)]
+enum InitialPosition {
+    Earliest,
+    Latest
+}
+
+impl FromStr for InitialPosition {
+    type Err = String;
+
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        match input.to_lowercase().as_str() {
+            "earliest" => Ok(InitialPosition::Earliest),
+            "latest" => Ok(InitialPosition::Latest),
+            _ => Err(format!("Invalid InitialPosition: {}", input)),
+        }
+    }
+}
+
 #[derive(Subcommand)]
 enum Commands {
     /// Start subscribing to the topic events
     Attach {
         #[arg(short, long)]
-        topic: String
+        topic: String,
+        #[clap(long, default_value = "earliest")]
+        position: InitialPosition
     },
     /// Stop subscribing to the topic events
     Detach {
@@ -49,9 +70,9 @@ async fn main() -> Result<(), Error> {
     let mut pulsar: Pulsar<_> = builder.build().await?;
 
     match cli.command {
-        Commands::Attach { topic } => {
+        Commands::Attach { topic, position } => {
             println!("Subscribing to {:?}", topic);
-            commands::attach::execute(&mut pulsar, &topic).await?;
+            commands::attach::execute(&mut pulsar, &topic, &position).await?;
             Ok(())
         },
         Commands::Detach { topic } => {

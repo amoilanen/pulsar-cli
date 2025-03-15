@@ -1,10 +1,15 @@
 - Add a command to start listening to a local topic
-- Add a command to stop listening to a local topic
+  -- Add an argument to listen from the start or from the end of the topic
 - Add command to publish to a local topic (possibly partitioned, support both partition and not partitioned)
   -- Both message properties and message data can be input if not specified otherwise
   -- Support publishing a list of messages
 - Add a command to search for a message from a local topic (possibly partitioned, support both partition and not partitioned)
   -- Both message properties and message data should be output if not specified otherwise
+  -- Option to either auto-acknowledge the messages or not auto-acknowledge them
+  -- Option to specify how far into the past should seek the old messages (i.e. reset the subscription with "seek", default ~1 day)
+  -- Option to limit the number of messages which can be found
+  -- If the subscription does not exist at the start of the search command create the subscription
+- Add a command to watch the local topic, when new messages are published they should be output to the console, Ctrl + C exits this mode
 
 - Enable support for external pulsar clusters with custom authentication such as StreamNative
   -- Allow to either provide the auth details as options or read the auth details from ~/.config/pulsar/config (when the flag --pulsarctl is provided)
