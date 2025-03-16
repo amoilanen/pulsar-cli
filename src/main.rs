@@ -2,6 +2,7 @@ use clap::{Parser, Subcommand};
 use pulsar::{Pulsar, TokioExecutor};
 use std::str::FromStr;
 use anyhow::Error;
+use colored_json::to_colored_json_auto;
 
 mod commands;
 mod io;
@@ -37,7 +38,7 @@ enum Commands {
     Attach {
         #[arg(short, long)]
         topic: String,
-        #[clap(long, default_value = "earliest")]
+        #[arg(long, default_value = "earliest")]
         position: InitialPosition
     },
     /// Stop subscribing to the topic events
@@ -45,20 +46,39 @@ enum Commands {
         #[arg(short, long)]
         topic: String
     },
-    /// Publish
+    /// Publish to a given topic
     Publish {
         #[arg(short, long)]
         topic: String
     },
+    /// Search events from a given topic
     Search {
         #[arg(short, long)]
         topic: String,
-        #[arg(short, long)]
-        search_term: String
-        //TODO: Limit, ability to output both properties and messages, or just messages
+        #[arg(long)]
+        search_term: String,
+        #[arg(short, long, default_value = "false")]
+        acknowledge_searched: bool,
+        #[arg(long, default_value = "10")]
+        seek_minutes: usize,
+        #[arg(short, long, default_value = "100")]
+        limit: usize,
+        #[arg(short, long, default_value = "false")]
+        output_only_event_data: bool,
+        #[arg(long, default_value = "earliest")]
+        position: InitialPosition
     }
     //TODO: View the stats for a given topic and its partitions
     //TODO: Peek command
+    //TODO: Watch command
+}
+
+struct SearchOptions {
+    acknowledge_searched: bool,
+    seek_minutes: usize,
+    limit: usize,
+    output_only_event_data: bool,
+    position: InitialPosition
 }
 
 #[tokio::main]
@@ -86,6 +106,22 @@ async fn main() -> Result<(), Error> {
             println!("Successfully published to {:?}", topic);
             Ok(())
         }
+        Commands::Search { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_event_data, position } =>{
+            println!("Searching for events using search term {}", search_term);
+            let found_events = commands::search::execute(&mut pulsar, &topic, &search_term, &SearchOptions {
+                acknowledge_searched,
+                seek_minutes,
+                limit,
+                output_only_event_data,
+                position
+            }).await?;
+            if found_events.len() > 0 {
+                println!("{}", to_colored_json_auto(&found_events)?);
+            } else {
+                println!("No events found");
+            }
+            Ok(())
+        },
         _ => {
             println!("Not yet implemented");
             Ok(())

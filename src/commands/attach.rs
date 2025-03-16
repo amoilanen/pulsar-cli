@@ -11,7 +11,7 @@ pub(crate) async fn execute<T: pulsar::Executor>(pulsar: &mut Pulsar<T>, topic: 
     let _: Consumer<String, _> = pulsar
         .consumer()
         .with_topic(topic)
-        .with_subscription_type(SubType::Exclusive)
+        .with_subscription_type(SubType::Shared)
         .with_subscription(super::DEFAULT_SUBSCRIPTION_NAME)
         .with_options(ConsumerOptions::default()
             .with_initial_position(initial_position))

@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.97"
 clap = { version = "4.5.31", features = ["derive"] }
+colored_json = "5.0.0"
 env_logger = "0.10.0"
 futures = "0.3"
 pulsar = "5.1"

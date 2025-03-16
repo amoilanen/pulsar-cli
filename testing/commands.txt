@@ -1,5 +1,7 @@
 cargo run -- attach --topic=public/default/orders
 
+cargo run -- detach --topic=public/default/orders
+
 cargo run -- attach --topic=public/default/orders --position=latest
 
 cargo run -- publish --topic=public/default/orders
@@ -35,3 +37,5 @@ cargo run -- publish --topic=public/default/orders
         }
     }
 ]
+
+cargo run -- search --topic=public/default/orders --search-term=123457
