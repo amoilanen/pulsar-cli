@@ -19,11 +19,12 @@ pub(crate) async fn execute<T: pulsar::Executor>(pulsar: &mut Pulsar<T>, topic: 
         vec![parsed]
     };
     for event_to_publish in to_publish.into_iter() {
-        if let Value::Object(event) = event_to_publish {
-            let data = &event["data"];
+        if let Value::Object(event) = &event_to_publish {
+            let data = &event.get("data").ok_or_else(|| anyhow!("'data' is not found in the event {:?}", &event_to_publish))?;
             let mut message = MessageBuilder::new(&mut producer)
                 .with_content(serde_json::to_string(data)?.as_bytes().to_vec());
-            if let Value::Object(properties) = &event["properties"] {
+            let event_properties = &event.get("properties").ok_or_else(|| anyhow!("'properties' is not found in the event {:?}", &event_to_publish))?;
+            if let Value::Object(properties) = event_properties {
                 for (key, value) in properties {
                     message = message.with_property(key, value.as_str().ok_or(anyhow!("Value {:?} cannot be converted to a String", value))?);
                 }
