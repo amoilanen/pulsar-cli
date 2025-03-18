@@ -1,9 +1,10 @@
 use futures::StreamExt;
 use pulsar::{Pulsar, SubType, Consumer, ConsumerOptions, consumer::InitialPosition};
+use pulsar::message::proto::{MessageMetadata, KeyValue};
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::time::Duration;
 use crate::InitialPosition as RequestedInitialPosition;
-use serde_json::Value;
+use serde_json::{Value, json};
 use tokio::time::timeout; 
 use anyhow::{Error, anyhow};
 use crate::SearchOptions;
@@ -39,17 +40,25 @@ pub(crate) async fn execute<T: pulsar::Executor>(pulsar: &mut Pulsar<T>, topic: 
             consumer.ack(&event).await?;
         }
         let payload = &event.deserialize()?;
-        let properties = &event.payload.metadata.properties;
 
-        //TODO: Serialize properties to JSON
-        println!("Properties {:?}", properties);
         println!("Received message '{:?}' id='{:?}'", payload, &event.message_id());
         //TODO: Also search by event properties, not only data
-        //TODO: Also push properties of the message into the result, not only the payload
         if payload.contains(search_term) {
             println!("Found message id='{:?}'", event.message_id());
+            let properties = &event.payload.metadata.properties;
+            let mut event_properties = serde_json::Map::new();
+            for key_value in properties.into_iter() {
+                print!("properties: key = {:?}, value = {:?}", &key_value.key, &key_value.value);
+                event_properties.insert(key_value.key.clone(), json!(key_value.value));
+            }
+
             let json_payload = serde_json::from_str(&payload)?;
-            found_events.push(json_payload);
+            let mut found_event = serde_json::Map::new();
+            found_event.insert("properties".to_owned(), serde_json::Value::Object(event_properties));
+            found_event.insert("data".to_owned(), json_payload);
+
+            //let found_event = json_payload;
+            found_events.push(serde_json::Value::Object(found_event));
             found_events_count = found_events_count + 1;
         }
 
