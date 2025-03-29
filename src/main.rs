@@ -7,6 +7,7 @@ use colored_json::to_colored_json_auto;
 mod commands;
 mod io;
 mod message;
+mod common;
 
 #[derive(Parser)]
 #[command(name = "pulsar-cli", about = "A command line tool to simpify publishing and viewing Pulsar messages")]

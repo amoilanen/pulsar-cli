@@ -1,10 +1,3 @@
-- Add a command to search for a message from a local topic (possibly partitioned, support both partition and not partitioned)
-  -- Both message properties and message data should be output if not specified otherwise
-  -- Both message properties and message data should be searched
-  -- Option to either auto-acknowledge the messages or not auto-acknowledge them
-  -- Option to specify how far into the past should seek the old messages (i.e. reset the subscription with "seek", default ~1 day)
-  -- Option to limit the number of messages which can be found
-  -- If the subscription does not exist at the start of the search command create the subscription
 - Add a command to watch the local topic, when new messages are published they should be output to the console, Ctrl + C exits this mode
 
 - Add the "verbose" option which either turns on and turns off extra logging
