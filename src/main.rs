@@ -69,10 +69,26 @@ enum Commands {
         output_only_event_data: bool,
         #[arg(long, default_value = "earliest")]
         position: InitialPosition
+    },
+    /// Watch events from a given topic
+    Watch {
+        #[arg(short, long)]
+        topic: String,
+        #[arg(long, default_value = "")]
+        search_term: String,
+        #[arg(short, long, default_value = "true")]
+        acknowledge_searched: bool,
+        #[arg(long, default_value = "10")]
+        seek_minutes: usize,
+        #[arg(short, long, default_value = "100")]
+        limit: usize,
+        #[arg(short, long, default_value = "false")]
+        output_only_event_data: bool,
+        #[arg(long, default_value = "latest")]
+        position: InitialPosition
     }
     //TODO: View the stats for a given topic and its partitions
     //TODO: Peek command
-    //TODO: Watch command
 }
 
 struct SearchOptions {
@@ -122,6 +138,17 @@ async fn main() -> Result<(), Error> {
             } else {
                 println!("No events found");
             }
+            Ok(())
+        },
+        Commands::Watch { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_event_data, position } =>{
+            println!("Watching events on the topic {}", search_term);
+            commands::watch::execute(&mut pulsar, &topic, &search_term, &SearchOptions {
+                acknowledge_searched,
+                seek_minutes,
+                limit,
+                output_only_event_data,
+                position
+            }).await?;
             Ok(())
         },
         _ => {

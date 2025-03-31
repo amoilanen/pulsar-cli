@@ -26,7 +26,7 @@ else:
     client = pulsar.Client(pulsar_url, authentication=authentication)
 
 topic_name = 'persistent://public/default/orders'
-orders_number = 10
+orders_number = 100
 order_number_prefix = 223000
 
 producer = client.create_producer(topic_name)
