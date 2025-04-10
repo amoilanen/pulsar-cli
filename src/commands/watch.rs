@@ -1,47 +1,30 @@
-use futures::StreamExt;
 use pulsar::{Consumer, Pulsar};
 use tokio::signal;
-use crate::message;
-use crate::message::FoundMessage;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::time::Duration;
-use tokio::time::timeout; 
 use anyhow::Error;
 use crate::SearchOptions;
 use colored_json::to_colored_json_auto;
 use crate::common::subscribe_to_topic;
+use crate::common::{self, MessageConsumptionOptions};
 
 const TIMEOUT_TO_READ_NEXT_EVENT_MILLIS: u64 = 5000;
 
-//TODO: Re-factor duplication with search
-async fn receive_next_message_in_loop<T: pulsar::Executor>(consumer: &mut Consumer<String, T>, search_term: &str, options: &SearchOptions) -> Result<(), Error> {
-    let mut found_events_count: usize = 0;
-    loop {
-        if let Some(msg) = timeout(Duration::from_millis(TIMEOUT_TO_READ_NEXT_EVENT_MILLIS), consumer.next()).await.ok().flatten() {
-            let event = msg?;
-            if options.acknowledge_searched {
-                consumer.ack(&event).await?;
-            }
-            let payload = &event.deserialize()?;
-            let properties = message::get_properties(&event)?;
-            if payload.contains(search_term) || serde_json::to_string(&properties)?.contains(search_term) {
-                let full_found_event = FoundMessage {
-                    payload: payload.to_owned(),
-                    properties
-                };
-                let found_event = if options.output_only_event_data {
-                    serde_json::from_str(payload)?
-                } else {
-                    full_found_event.to_json()?
-                };
-                println!("{}", to_colored_json_auto(&found_event)?);
-                found_events_count = found_events_count + 1;
-            }
-            if found_events_count >= options.limit {
-                break;
-            }
+async fn scan_messages<T: pulsar::Executor>(consumer: &mut Consumer<String, T>, search_term: &str, options: &SearchOptions) -> Result<(), Error> {
+    let scan_options = MessageConsumptionOptions {
+        only_message_data: options.output_only_event_data,
+        acknowledge_consumed: options.acknowledge_searched,
+        break_on_no_message: false,
+        output_progress: false,
+        limit: options.limit
+    };
+    common::scan_messages(consumer, TIMEOUT_TO_READ_NEXT_EVENT_MILLIS, &scan_options, |message, message_json| {
+        let is_interested_in_message = message.payload.contains(search_term) || message.properties.contains(search_term);
+        if is_interested_in_message {
+            println!("{}", to_colored_json_auto(&message_json)?);
         }
-    }
+        Ok(is_interested_in_message)
+    }).await?;
     Ok(())
 }
 
@@ -52,7 +35,7 @@ pub(crate) async fn execute<T: pulsar::Executor>(pulsar: &mut Pulsar<T>, topic: 
     consumer.seek(None, None, Some(seek_offset), pulsar.clone()).await?;
 
     tokio::select! {
-        result = receive_next_message_in_loop(&mut consumer, search_term, options) => result,
+        result = scan_messages(&mut consumer, search_term, options) => result,
         _ = async {
             signal::ctrl_c().await.expect("Failed to listen for ctrl_c");
         } => {

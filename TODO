@@ -1,6 +1,7 @@
 - Add a command to watch the local topic, when new messages are published they should be output to the console, Ctrl + C exits this mode
 
 - Add the "verbose" option which either turns on and turns off extra logging
+- Make sure that the consistent "message" language is used, not "event" and "message" intermixed
 
 - Enable support for external pulsar clusters with custom authentication such as StreamNative
   -- Allow to either provide the auth details as options or read the auth details from ~/.config/pulsar/config (when the flag --pulsarctl is provided)

@@ -2,12 +2,13 @@ use pulsar::consumer::message::Message;
 use serde_json::json;
 use anyhow::Error;
 
-pub(crate) struct FoundMessage {
+pub(crate) struct PulsarMessage {
     pub(crate) payload: String,
     pub(crate) properties: String
 }
 
-impl FoundMessage {
+impl PulsarMessage {
+
     pub(crate) fn to_json(&self) -> Result<serde_json::Value, Error> {
         let mut result = serde_json::Map::new();
         result.insert("properties".to_owned(), serde_json::from_str(&self.properties)?);
