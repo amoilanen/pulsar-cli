@@ -3,11 +3,13 @@ use pulsar::{Pulsar, TokioExecutor};
 use std::str::FromStr;
 use anyhow::Error;
 use colored_json::to_colored_json_auto;
+use crate::pulsarctl::PulsarConfig;
 
 mod commands;
 mod io;
 mod message;
 mod common;
+mod pulsarctl;
 
 #[derive(Parser)]
 #[command(name = "pulsar-cli", about = "A command line tool to simpify publishing and viewing Pulsar messages")]
@@ -41,17 +43,23 @@ enum Commands {
         #[arg(short, long)]
         topic: String,
         #[arg(long, default_value = "earliest")]
-        position: InitialPosition
+        position: InitialPosition,
+        #[arg(short, long)]
+        pulsarctl_env: Option<String>
     },
     /// Stop subscribing to the topic events
     Detach {
         #[arg(short, long)]
-        topic: String
+        topic: String,
+        #[arg(short, long)]
+        pulsarctl_env: Option<String>
     },
     /// Publish to a given topic
     Publish {
         #[arg(short, long)]
-        topic: String
+        topic: String,
+        #[arg(short, long)]
+        pulsarctl_env: Option<String>
     },
     /// Search events from a given topic
     Search {
@@ -68,7 +76,9 @@ enum Commands {
         #[arg(short, long, default_value = "false")]
         output_only_event_data: bool,
         #[arg(long, default_value = "earliest")]
-        position: InitialPosition
+        position: InitialPosition,
+        #[arg(short, long)]
+        pulsarctl_env: Option<String>
     },
     /// Watch events from a given topic
     Watch {
@@ -85,13 +95,15 @@ enum Commands {
         #[arg(short, long, default_value = "false")]
         output_only_event_data: bool,
         #[arg(long, default_value = "latest")]
-        position: InitialPosition
+        position: InitialPosition,
+        #[arg(short, long)]
+        pulsarctl_env: Option<String>
     }
     //TODO: View the stats for a given topic and its partitions
     //TODO: Peek command
 }
 
-struct SearchOptions {
+struct ScanOptions {
     acknowledge_searched: bool,
     seek_minutes: usize,
     limit: usize,
@@ -108,25 +120,26 @@ async fn main() -> Result<(), Error> {
     let mut pulsar: Pulsar<_> = builder.build().await?;
 
     match cli.command {
-        Commands::Attach { topic, position } => {
-            println!("Subscribing to {:?}", topic);
+        Commands::Attach { topic, position, pulsarctl_env } => {
+            let config: PulsarConfig = pulsarctl::read_config()?;
+            println!("{:#?}", config);
             commands::attach::execute(&mut pulsar, &topic, &position).await?;
             Ok(())
         },
-        Commands::Detach { topic } => {
+        Commands::Detach { topic, pulsarctl_env } => {
             println!("Unsubscribing from {:?}", topic);
             commands::detach::execute(&mut pulsar, &topic).await?;
             Ok(())
         }
-        Commands::Publish { topic } => {
+        Commands::Publish { topic, pulsarctl_env } => {
             println!("Publishing to {:?}", topic);
             commands::publish::execute(&mut pulsar, &topic).await?;
             println!("Successfully published to {:?}", topic);
             Ok(())
         }
-        Commands::Search { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_event_data, position } =>{
+        Commands::Search { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_event_data, position, pulsarctl_env } =>{
             println!("Searching for events using search term {}", search_term);
-            let found_events = commands::search::execute(&mut pulsar, &topic, &search_term, &SearchOptions {
+            let found_events = commands::search::execute(&mut pulsar, &topic, &search_term, &ScanOptions {
                 acknowledge_searched,
                 seek_minutes,
                 limit,
@@ -140,9 +153,9 @@ async fn main() -> Result<(), Error> {
             }
             Ok(())
         },
-        Commands::Watch { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_event_data, position } =>{
+        Commands::Watch { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_event_data, position, pulsarctl_env } =>{
             println!("Watching events on the topic {}", search_term);
-            commands::watch::execute(&mut pulsar, &topic, &search_term, &SearchOptions {
+            commands::watch::execute(&mut pulsar, &topic, &search_term, &ScanOptions {
                 acknowledge_searched,
                 seek_minutes,
                 limit,

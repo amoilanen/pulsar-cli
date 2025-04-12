@@ -1,10 +1,10 @@
+- Enable support for external pulsar clusters with custom authentication such as StreamNative
+  -- Allow to either provide the auth details as options or read the auth details from ~/.config/pulsar/config (when the flag --pulsarctl is provided)
+
 - Add a command to watch the local topic, when new messages are published they should be output to the console, Ctrl + C exits this mode
 
 - Add the "verbose" option which either turns on and turns off extra logging
 - Make sure that the consistent "message" language is used, not "event" and "message" intermixed
-
-- Enable support for external pulsar clusters with custom authentication such as StreamNative
-  -- Allow to either provide the auth details as options or read the auth details from ~/.config/pulsar/config (when the flag --pulsarctl is provided)
 
 - Add a command to peek at the messages from a local topic (possibly partitioned, support both partition and not partitioned)
 - Add a command to check the stats of a local topic (possibly partitioned, support both partition and not partitioned)

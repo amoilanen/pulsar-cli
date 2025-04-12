@@ -3,14 +3,14 @@ use tokio::signal;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::time::Duration;
 use anyhow::Error;
-use crate::SearchOptions;
+use crate::ScanOptions;
 use colored_json::to_colored_json_auto;
 use crate::common::subscribe_to_topic;
 use crate::common::{self, MessageConsumptionOptions};
 
 const TIMEOUT_TO_READ_NEXT_EVENT_MILLIS: u64 = 5000;
 
-async fn scan_messages<T: pulsar::Executor>(consumer: &mut Consumer<String, T>, search_term: &str, options: &SearchOptions) -> Result<(), Error> {
+async fn scan_messages<T: pulsar::Executor>(consumer: &mut Consumer<String, T>, search_term: &str, options: &ScanOptions) -> Result<(), Error> {
     let scan_options = MessageConsumptionOptions {
         only_message_data: options.output_only_event_data,
         acknowledge_consumed: options.acknowledge_searched,
@@ -28,7 +28,7 @@ async fn scan_messages<T: pulsar::Executor>(consumer: &mut Consumer<String, T>, 
     Ok(())
 }
 
-pub(crate) async fn execute<T: pulsar::Executor>(pulsar: &mut Pulsar<T>, topic: &str, search_term: &str, options: &SearchOptions) -> Result<(), Error> {
+pub(crate) async fn execute<T: pulsar::Executor>(pulsar: &mut Pulsar<T>, topic: &str, search_term: &str, options: &ScanOptions) -> Result<(), Error> {
     let mut consumer = subscribe_to_topic(pulsar, topic, crate::commands::DEFAULT_SUBSCRIPTION_NAME, &options.position).await?;
 
     let seek_offset = (SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis() - Duration::from_secs((options.seek_minutes * 60) as u64).as_millis()) as u64;

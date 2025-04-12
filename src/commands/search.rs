@@ -3,10 +3,10 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use std::time::Duration;
 use serde_json::Value;
 use anyhow::Error;
-use crate::SearchOptions;
+use crate::ScanOptions;
 use crate::common::{self, MessageConsumptionOptions};
 
-pub(crate) async fn execute<T: pulsar::Executor>(pulsar: &mut Pulsar<T>, topic: &str, search_term: &str, options: &SearchOptions) -> Result<Vec<Value>, Error> {
+pub(crate) async fn execute<T: pulsar::Executor>(pulsar: &mut Pulsar<T>, topic: &str, search_term: &str, options: &ScanOptions) -> Result<Vec<Value>, Error> {
     let mut consumer = common::subscribe_to_topic(pulsar, topic, crate::commands::DEFAULT_SUBSCRIPTION_NAME, &options.position).await?;
 
     let seek_offset = (SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis() - Duration::from_secs((options.seek_minutes * 60) as u64).as_millis()) as u64;
