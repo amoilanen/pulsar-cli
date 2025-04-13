@@ -52,3 +52,6 @@ cargo run -- search --topic=public/default/orders --search-term=225692 --output-
 cargo run -- search --topic=public/default/orders --search-term=225692 --acknowledge-searched
 
 cargo run -- watch --topic=public/default/orders
+
+cargo run -- attach --topic=public/default/orders --pulsarctl-env=streamnative
+cargo run -- search --topic=public/default/orders --search-term=12345 --pulsarctl-env=streamnative

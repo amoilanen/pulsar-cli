@@ -9,11 +9,13 @@ use anyhow::Error;
 #[derive(Debug, Deserialize)]
 pub(crate) struct PulsarConfig {
     #[serde(rename = "auth-info")]
-    auth_info: HashMap<String, PulsarContext>,
-    contexts: HashMap<String, PulsarContextSettings>,
+    pub(crate) auth_info: HashMap<String, PulsarContext>,
+    pub(crate) contexts: HashMap<String, PulsarContextSettings>,
     #[serde(rename = "current-context")]
-    current_context: String
+    pub(crate) current_context: String
 }
+
+//TODO: Add method to select a given context
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct PulsarContextSettings {
