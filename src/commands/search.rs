@@ -16,7 +16,7 @@ pub(crate) async fn execute<T: pulsar::Executor>(pulsar: &mut Pulsar<T>, topic: 
     let mut found_messages: Vec<Value> = Vec::new();
 
     let scan_options = MessageConsumptionOptions {
-        only_message_data: options.output_only_event_data,
+        only_message_data: options.output_only_message_data,
         acknowledge_consumed: options.acknowledge_searched,
         break_on_no_message: true,
         output_progress: true,

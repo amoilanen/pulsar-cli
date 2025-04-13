@@ -11,31 +11,18 @@ pub(crate) struct PulsarConfig {
     #[serde(rename = "auth-info")]
     pub(crate) auth_info: HashMap<String, PulsarContext>,
     pub(crate) contexts: HashMap<String, PulsarContextSettings>,
-    #[serde(rename = "current-context")]
-    pub(crate) current_context: String
 }
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct PulsarContextSettings {
-    #[serde(rename = "admin-service-url")]
-    pub(crate) admin_service_url: String,
     #[serde(rename = "bookie-service-url")]
     pub(crate) bookie_service_url: String
 }
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct PulsarContext {
-    #[serde(rename = "locationoforigin")]
-    pub(crate) location_of_origin: String,
-    pub(crate) tls_trust_certs_file_path: String,
-    pub(crate) tls_allow_insecure_connection: bool,
-    pub(crate) token: String,
-    #[serde(rename = "tokenFile")]
-    pub(crate) token_file: String,
     pub(crate) issuer_endpoint: String,
-    pub(crate) client_id: String,
     pub(crate) audience: String,
-    pub(crate) scope: String,
     pub(crate) key_file: String
 }
 

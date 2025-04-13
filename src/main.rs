@@ -37,7 +37,7 @@ impl FromStr for InitialPosition {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Start subscribing to the topic events
+    /// Start subscribing to the topic messages
     Attach {
         #[arg(short, long)]
         topic: String,
@@ -46,7 +46,7 @@ enum Commands {
         #[arg(short, long)]
         pulsarctl_env: Option<String>
     },
-    /// Stop subscribing to the topic events
+    /// Stop subscribing to the topic messages
     Detach {
         #[arg(short, long)]
         topic: String,
@@ -59,9 +59,9 @@ enum Commands {
         topic: String,
         #[arg(short, long)]
         pulsarctl_env: Option<String>
-        //TODO: Add option to add a delay between publishing each individual event
+        //TODO: Add option to add a delay between publishing each individual message
     },
-    /// Search events from a given topic
+    /// Search messages from a given topic
     Search {
         #[arg(short, long)]
         topic: String,
@@ -74,13 +74,13 @@ enum Commands {
         #[arg(short, long, default_value = "100")]
         limit: usize,
         #[arg(short, long, default_value = "false")]
-        output_only_event_data: bool,
+        output_only_message_data: bool,
         #[arg(long, default_value = "earliest")]
         position: InitialPosition,
         #[arg(short, long)]
         pulsarctl_env: Option<String>
     },
-    /// Watch events from a given topic
+    /// Watch messages from a given topic
     Watch {
         #[arg(short, long)]
         topic: String,
@@ -93,7 +93,7 @@ enum Commands {
         #[arg(short, long, default_value = "100")]
         limit: usize,
         #[arg(short, long, default_value = "false")]
-        output_only_event_data: bool,
+        output_only_message_data: bool,
         #[arg(long, default_value = "latest")]
         position: InitialPosition,
         #[arg(short, long)]
@@ -119,7 +119,7 @@ struct ScanOptions {
     acknowledge_searched: bool,
     seek_minutes: usize,
     limit: usize,
-    output_only_event_data: bool,
+    output_only_message_data: bool,
     position: InitialPosition
 }
 
@@ -146,35 +146,31 @@ async fn main() -> Result<(), Error> {
             println!("Successfully published to {:?}", topic);
             Ok(())
         }
-        Commands::Search { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_event_data, position, .. } =>{
-            println!("Searching for events using search term {}", search_term);
-            let found_events = commands::search::execute(&mut pulsar, &topic, &search_term, &ScanOptions {
+        Commands::Search { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_message_data, position, .. } =>{
+            println!("Searching for messages using search term {}", search_term);
+            let found_messages = commands::search::execute(&mut pulsar, &topic, &search_term, &ScanOptions {
                 acknowledge_searched,
                 seek_minutes,
                 limit,
-                output_only_event_data,
+                output_only_message_data,
                 position
             }).await?;
-            if found_events.len() > 0 {
-                println!("{}", to_colored_json_auto(&found_events)?);
+            if found_messages.len() > 0 {
+                println!("{}", to_colored_json_auto(&found_messages)?);
             } else {
-                println!("No events found");
+                println!("No messages found");
             }
             Ok(())
         },
-        Commands::Watch { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_event_data, position, .. } =>{
-            println!("Watching events on the topic {}", search_term);
+        Commands::Watch { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_message_data, position, .. } =>{
+            println!("Watching messages on the topic {}", search_term);
             commands::watch::execute(&mut pulsar, &topic, &search_term, &ScanOptions {
                 acknowledge_searched,
                 seek_minutes,
                 limit,
-                output_only_event_data,
+                output_only_message_data,
                 position
             }).await?;
-            Ok(())
-        },
-        _ => {
-            println!("Not yet implemented");
             Ok(())
         }
     }

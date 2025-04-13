@@ -12,7 +12,7 @@ const TIMEOUT_TO_READ_NEXT_EVENT_MILLIS: u64 = 5000;
 
 async fn scan_messages<T: pulsar::Executor>(consumer: &mut Consumer<String, T>, search_term: &str, options: &ScanOptions) -> Result<(), Error> {
     let scan_options = MessageConsumptionOptions {
-        only_message_data: options.output_only_event_data,
+        only_message_data: options.output_only_message_data,
         acknowledge_consumed: options.acknowledge_searched,
         break_on_no_message: false,
         output_progress: false,

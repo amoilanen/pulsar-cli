@@ -48,7 +48,7 @@ cargo run -- publish --topic=public/default/orders
 }
 
 cargo run -- search --topic=public/default/orders --search-term=123457
-cargo run -- search --topic=public/default/orders --search-term=225692 --output-only-event-data
+cargo run -- search --topic=public/default/orders --search-term=225692 --output-only-message-data
 cargo run -- search --topic=public/default/orders --search-term=225692 --acknowledge-searched
 
 cargo run -- watch --topic=public/default/orders
