@@ -1,16 +1,14 @@
 use clap::{Parser, Subcommand};
-use pulsar::{Pulsar, TokioExecutor};
-use pulsar::authentication::oauth2::{OAuth2Authentication, OAuth2Params};
 use std::str::FromStr;
-use anyhow::{anyhow, Error, Result};
+use anyhow::{Error, Result};
 use colored_json::to_colored_json_auto;
-use crate::pulsarctl::PulsarConfig;
 
 mod commands;
 mod io;
 mod message;
 mod common;
 mod pulsarctl;
+mod client;
 
 #[derive(Parser)]
 #[command(name = "pulsar-cli", about = "A command line tool to simpify publishing and viewing Pulsar messages")]
@@ -105,6 +103,18 @@ enum Commands {
     //TODO: Peek command
 }
 
+impl Commands {
+    fn get_pulsarctl_env(&self) -> Option<String> {
+        match self {
+            Commands::Attach { pulsarctl_env, .. } => pulsarctl_env.clone(),
+            Commands::Detach { pulsarctl_env, .. } => pulsarctl_env.clone(),
+            Commands::Publish { pulsarctl_env, .. } => pulsarctl_env.clone(),
+            Commands::Search { pulsarctl_env, .. } => pulsarctl_env.clone(),
+            Commands::Watch { pulsarctl_env, .. } => pulsarctl_env.clone()
+        }
+    }
+}
+
 struct ScanOptions {
     acknowledge_searched: bool,
     seek_minutes: usize,
@@ -113,56 +123,30 @@ struct ScanOptions {
     position: InitialPosition
 }
 
-//TODO: Move to the pulsarctl module
-async fn build_client(pulsarctl_env: Option<String>) -> Result<Pulsar<TokioExecutor>, Error> {
-    match pulsarctl_env {
-        Some(env) => {
-            let config: PulsarConfig = pulsarctl::read_config()?;
-            let context_settings = config.contexts.get(&env).ok_or(anyhow!("Could not find environment {} in local pulsarctl config", env))?;
-            let context = config.auth_info.get(&env).ok_or(anyhow!("Could not find environment {} in local pulsarctl config", env))?;
-            let addr = context_settings.bookie_service_url.replace("https", "pulsar+ssl");
-            let builder = Pulsar::builder(addr, TokioExecutor);
-            builder.with_auth_provider(OAuth2Authentication::client_credentials(OAuth2Params {
-                issuer_url: context.issuer_endpoint.to_string(),
-                credentials_url: format!("file://{}", context.key_file).to_string(),
-                audience: Some(context.audience.to_string()),
-                scope: None,
-            })).build().await.map_err(anyhow::Error::from)
-        },
-        None => {
-            let addr = std::env::var("PULSAR_ADDRESS").unwrap_or_else(|_| "pulsar://localhost:6650".to_string());
-            let builder = Pulsar::builder(addr, TokioExecutor);
-            builder.build().await.map_err(anyhow::Error::from)
-        }
-    }
-}
-
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let cli = CommandLineInputs::parse();
+    let pulsarctl_env = cli.command.get_pulsarctl_env();
+    let mut pulsar = client::build_client(pulsarctl_env).await?;
 
     match cli.command {
-        Commands::Attach { topic, position, pulsarctl_env } => {
-            let mut pulsar = build_client(pulsarctl_env).await?;
+        Commands::Attach { topic, position, .. } => {
             println!("Attaching to {:?}", topic);
             commands::attach::execute(&mut pulsar, &topic, &position).await?;
             Ok(())
         },
-        Commands::Detach { topic, pulsarctl_env } => {
-            let mut pulsar = build_client(pulsarctl_env).await?;
+        Commands::Detach { topic, .. } => {
             println!("Detaching from {:?}", topic);
             commands::detach::execute(&mut pulsar, &topic).await?;
             Ok(())
         }
-        Commands::Publish { topic, pulsarctl_env } => {
-            let mut pulsar = build_client(pulsarctl_env).await?;
+        Commands::Publish { topic, .. } => {
             println!("Publishing to {:?}", topic);
             commands::publish::execute(&mut pulsar, &topic).await?;
             println!("Successfully published to {:?}", topic);
             Ok(())
         }
-        Commands::Search { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_event_data, position, pulsarctl_env } =>{
-            let mut pulsar = build_client(pulsarctl_env).await?;
+        Commands::Search { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_event_data, position, .. } =>{
             println!("Searching for events using search term {}", search_term);
             let found_events = commands::search::execute(&mut pulsar, &topic, &search_term, &ScanOptions {
                 acknowledge_searched,
@@ -178,8 +162,7 @@ async fn main() -> Result<(), Error> {
             }
             Ok(())
         },
-        Commands::Watch { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_event_data, position, pulsarctl_env } =>{
-            let mut pulsar = build_client(pulsarctl_env).await?;
+        Commands::Watch { topic, search_term, acknowledge_searched, seek_minutes, limit, output_only_event_data, position, .. } =>{
             println!("Watching events on the topic {}", search_term);
             commands::watch::execute(&mut pulsar, &topic, &search_term, &ScanOptions {
                 acknowledge_searched,

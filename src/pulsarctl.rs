@@ -4,7 +4,7 @@ use std::env;
 use std::path::PathBuf;
 use std::fs::File;
 use std::io::BufReader;
-use anyhow::Error;
+use anyhow::{Error, Result};
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct PulsarConfig {
@@ -14,8 +14,6 @@ pub(crate) struct PulsarConfig {
     #[serde(rename = "current-context")]
     pub(crate) current_context: String
 }
-
-//TODO: Add method to select a given context
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct PulsarContextSettings {
