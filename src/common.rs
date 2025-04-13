@@ -84,7 +84,7 @@ pub(crate) async fn unsubscribe_from_topic<T: pulsar::Executor>(pulsar: &mut Pul
     let mut consumer: Consumer<String, _> = pulsar
         .consumer()
         .with_topic(topic)
-        .with_subscription_type(SubType::Exclusive)
+        .with_subscription_type(SubType::Shared)
         .with_subscription(subscription_name)
         .with_options(ConsumerOptions::default()
             .with_initial_position(InitialPosition::Earliest))

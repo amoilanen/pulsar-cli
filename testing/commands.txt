@@ -53,5 +53,31 @@ cargo run -- search --topic=public/default/orders --search-term=225692 --acknowl
 
 cargo run -- watch --topic=public/default/orders
 
+cargo run -- publish --topic=public/default/orders --pulsarctl-env=streamnative
+[
+    {
+        "properties": {"published_at": "2025-03-13T21:56:54.160296+00:00"},
+        "data": {
+            "order_id": "3d2543b4-2a58-4c80-b18d-ac58f3524087",
+            "order_number": "123456"
+        }
+    },
+    {
+        "properties": {"published_at": "2025-03-14T10:15:23.123456+00:00"},
+        "data": {
+            "order_id": "7f1d4a5d-9c2f-4e4b-a1d8-f2b9c4a3f8e2",
+            "order_number": "123457"
+        }
+    },
+    {
+        "properties": {"published_at": "2025-03-14T15:42:11.654321+00:00"},
+        "data": {
+            "order_id": "c5f2b8a1-3b7d-4f3d-9a2c-8e5d7f4a9b1c",
+            "order_number": "123458"
+        }
+    }
+]
 cargo run -- attach --topic=public/default/orders --pulsarctl-env=streamnative
+cargo run -- detach --topic=public/default/orders --pulsarctl-env=streamnative
 cargo run -- search --topic=public/default/orders --search-term=12345 --pulsarctl-env=streamnative
+cargo run -- watch --topic=public/default/orders --pulsarctl-env=streamnative

@@ -61,6 +61,7 @@ enum Commands {
         topic: String,
         #[arg(short, long)]
         pulsarctl_env: Option<String>
+        //TODO: Add option to add a delay between publishing each individual event
     },
     /// Search events from a given topic
     Search {

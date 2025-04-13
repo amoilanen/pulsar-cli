@@ -51,6 +51,5 @@ pub(crate) fn read_config() -> Result<PulsarConfig, Error> {
     let file = File::open(&path)?;
     let reader = BufReader::new(file);
     let config: PulsarConfig = serde_yaml::from_reader(reader)?;
-    println!("{:#?}", config);
     Ok(config)
 }

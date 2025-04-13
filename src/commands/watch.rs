@@ -32,7 +32,8 @@ pub(crate) async fn execute<T: pulsar::Executor>(pulsar: &mut Pulsar<T>, topic: 
     let mut consumer = subscribe_to_topic(pulsar, topic, crate::commands::DEFAULT_SUBSCRIPTION_NAME, &options.position).await?;
 
     let seek_offset = (SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis() - Duration::from_secs((options.seek_minutes * 60) as u64).as_millis()) as u64;
-    consumer.seek(None, None, Some(seek_offset), pulsar.clone()).await?;
+    let consumer_ids = consumer.consumer_id().iter().map(|id| id.to_string()).collect();
+    consumer.seek(Some(consumer_ids), None, Some(seek_offset), pulsar.clone()).await?;
 
     tokio::select! {
         result = scan_messages(&mut consumer, search_term, options) => result,
