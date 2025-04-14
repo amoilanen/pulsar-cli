@@ -17,7 +17,11 @@ async fn build_pulsarctl_client(pulsarctl_env: String) -> Result<Pulsar<TokioExe
     let builder = Pulsar::builder(addr, TokioExecutor);
     builder.with_auth_provider(OAuth2Authentication::client_credentials(OAuth2Params {
         issuer_url: context.issuer_endpoint.to_string(),
-        credentials_url: format!("file://{}", context.key_file).to_string(),
+        credentials_url: if context.key_file.starts_with("file://") {
+            context.key_file.to_string()
+        } else {
+            format!("file://{}", context.key_file).to_string()
+        },
         audience: Some(context.audience.to_string()),
         scope: None,
     })).build().await.map_err(anyhow::Error::from)
